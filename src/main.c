@@ -1,19 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "../include/Employee.h"
+#include "../include/HashOnFile.h"
 
 
 
 int main(int argc, char const *argv[])
 {
-    Object empl = NULL;
-    char* name;
+    Hash myHashTable;
 
-   // empl = newEmployee(100, "Deived William", 25, 50000.89f);
-    name = GetNameEmployee(empl);
-  
-    printf("%s ", name);
+    myHashTable = newHashTable("1234", 7u);
 
     return 0;
 }
