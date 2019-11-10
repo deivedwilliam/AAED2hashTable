@@ -97,9 +97,52 @@ const char* GetNameEmployee(Object employee)
 }
 short GetAgeEmployee(Object employee)
 {
+    Employee empl = NULL;
+    short age = -1;
 
+    try
+    {
+        CEmployee(employee, empl);
+        age = empl->age;
+    }
+    catch(NullPointerException)
+    {
+        PrintExceptionStdOut(NullPointerException);
+    }
+
+    return age;
 }
+
 float GetSalaryEmployee(Object employee)
 {
+    Employee empl = NULL;
+    float salary = 0.0f;
 
+    try
+    {
+        CEmployee(employee, empl);
+        salary = empl->salary;
+    }
+    catch(NullPointerException)
+    {
+        PrintExceptionStdOut(NullPointerException);
+    }
+
+    return salary;
+}
+
+void FreeEmployee(Object employee)
+{
+    Employee empl;
+
+    try
+    {
+        CEmployee(employee, empl);
+        free(empl->name);
+        free(employee);
+    }
+    catch(NullPointerException)
+    {
+        PrintExceptionStdOut(NullPointerException);
+    }
 }
