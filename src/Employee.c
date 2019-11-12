@@ -4,6 +4,8 @@
 #include "../include/Exception.h"
 #include <string.h>
 
+#define MAX_NAME 15U
+
 #define CEmployee(Obj, Emp) \
     if(Obj == NULL)                         \
     {                                       \
@@ -19,9 +21,17 @@
 typedef struct Employee
 {
     unsigned code;
-    char* name;
+    char name[MAX_NAME];
     float salary;
-    short age;
+    union 
+	{
+		struct 
+		{
+			unsigned next:24;
+            unsigned age:7;
+			unsigned status:1;
+		};
+	};
 }*Employee;
 
 
@@ -34,21 +44,14 @@ Object newEmployee(unsigned code, const char* name, short age, float salary)
     try
     {
         empl = (Employee)malloc(sizeof(struct Employee));
-        memset(empl, 0, sizeof(struct Employee));
-
+                                                                                          
         if(empl != NULL)
         {
             empl->code = code;
             empl->age = age;
-            empl->name = (char*)calloc(strlen(name) + 1, sizeof(char));
-            if(empl->name != NULL)
-            {
-                strcpy(empl->name, name);
-            }
-            else
-            {
-                throw(__MemoryAllocationException__);
-            }
+            empl->next = -1;
+            empl->status = 1;
+            strcpy(empl->name, name);
         }
         else
         {
@@ -59,7 +62,7 @@ Object newEmployee(unsigned code, const char* name, short age, float salary)
         PrintExceptionStdOut(MemoryAllocationException);
     }
 
-    return empl;
+    return (Object)empl;
 }
 
 const char* GetNameEmployee(Object employee)
@@ -95,10 +98,10 @@ const char* GetNameEmployee(Object employee)
 
     return name;
 }
-short GetAgeEmployee(Object employee)
+int GetAgeEmployee(Object employee)
 {
     Employee empl = NULL;
-    short age = -1;
+    int age = -1;
 
     try
     {
@@ -131,6 +134,41 @@ float GetSalaryEmployee(Object employee)
     return salary;
 }
 
+int GetNextPointer(Object employee)
+{
+    Employee empl = NULL;
+    int next = NULL_POINTER;
+
+    try
+    {
+        CEmployee(employee, empl);
+        next = (int)(short)(empl->next);
+    }
+    catch(NullPointerException)
+    {
+        PrintExceptionStdOut(NullPointerException);
+    }
+
+    return next;
+}
+
+int GetStatusFlag(Object employee)
+{
+    Employee empl = NULL;
+    int status = NULL_POINTER;
+
+    try
+    {
+        CEmployee(employee, empl);
+        status = (int)(empl->status);
+    }
+    catch(NullPointerException)
+    {
+        PrintExceptionStdOut(NullPointerException);
+    }
+
+    return status;
+}
 void FreeEmployee(Object employee)
 {
     Employee empl;
@@ -145,4 +183,22 @@ void FreeEmployee(Object employee)
     {
         PrintExceptionStdOut(NullPointerException);
     }
+}
+
+unsigned GetCodeEmployee(Object employee)
+{
+    Employee empl = NULL;
+    unsigned int code;
+
+    try
+    {
+        CEmployee(employee, empl);
+        code = empl->code;
+    }
+    catch(NullPointerException)
+    {
+        PrintExceptionStdOut(NullPointerException);
+    }
+
+    return code;
 }

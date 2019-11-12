@@ -4,11 +4,11 @@
 #include "../include/Typedefs.h"
 #include <stdio.h>
 
-typedef void* Hash;
 
+Object newHashTable(const char* tag, int size, int(*HashFunction)(Object));
 
-Hash newHashTable(const char* tag, int size);
-
-
+void InsertHashTable(Object hash, Object data, Object key);
+void DestroyHashTable(Object hash);
+void PrintHashTable(Object hash);
 
 #endif

@@ -6,10 +6,11 @@
 */
 
 
+
 #ifndef TYPEDEFS_H_
 #define TYPEDEFS_H_ 
 
-
+#define NULL_POINTER -1
 #define None -1
 
 typedef void* Object;

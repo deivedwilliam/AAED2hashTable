@@ -2,25 +2,36 @@
 #include "../include/Typedefs.h"
 
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 #include "../include/Exception.h"
 
-#define NULL_POINTER -1
+#define CHash(Obj, Hash) \
+    if(Obj == NULL)                         \
+    {                                       \
+        throw(__NullPointerException__);    \
+    }                                       \
+    else                                    \
+    {                                       \
+        Hash = (HashTable)Obj;              \
+    }
+     
+
 
 typedef struct HashTable
 {
     FILE* hashPointers;
+    FILE* data;
     unsigned elements;
     unsigned size;
     unsigned nextExpand;
     unsigned expandCounts;
     char* tag;
-    int(*HashFunction)(Object hash, Object key); 
+    int(*HashFunction)(Object key); 
 }*HashTable;
 
 
-Hash newHashTable(const char* tag, int size)
+Object newHashTable(const char* tag, int size, int(*HashFunction)(Object))
 {
     HashTable hTable = NULL;
     unsigned i;
@@ -37,7 +48,7 @@ Hash newHashTable(const char* tag, int size)
             hTable->nextExpand = 0;
             hTable->expandCounts = 0;
             hTable->tag = (char*)calloc(strlen(tag) + 1, sizeof(char));
-            
+            hTable->HashFunction = HashFunction;
             if(hTable->tag != NULL)
             {
                 strcpy(hTable->tag, tag);
@@ -47,9 +58,10 @@ Hash newHashTable(const char* tag, int size)
                 throw(__MemoryAllocationException__);
             }
 
-            FileOpen(hTable->hashPointers, strcat(hTable->tag, "_hashTable.bin"), "w+b");
+            FileOpen(hTable->hashPointers,"hashTable.bin", "w+b");
+            FileOpen(hTable->data, strcat(hTable->tag, "_data.bin"), "wb+");
 
-            for(i = 0; i < hTable->size; i++)
+            for(i = 0; i < (hTable->size+1); i++)
             {
                 FileWrite(&temp , sizeof(unsigned), 1, hTable->hashPointers, int res);
             }
@@ -65,5 +77,86 @@ Hash newHashTable(const char* tag, int size)
         PrintExceptionStdOut(MemoryAllocationException);
     }
 
-    return (Hash)hTable;
+    return (Object)hTable;
+}
+
+
+void DestroyHashTable(Object hash)
+{
+    HashTable hTable = NULL;
+
+    try
+    {
+        hTable = (HashTable)hash;
+
+        if(hTable != NULL)
+        {
+            FileClose(hTable->hashPointers);
+            //FileClose(hTable->data);
+        }
+        else
+        {
+            throw(__NullPointerException__);
+        }
+        
+    }
+    catch(NullPointerException)
+    {
+        PrintExceptionStdOut(NullPointerException);
+    }
+}
+
+void PrintHashTable(Object hash)
+{
+    HashTable hTable = NULL;
+    unsigned i;
+    int pointer = NULL_POINTER;
+    char buff[32];
+
+    try
+    {
+        hTable = (HashTable)hash;
+
+        if(hTable != NULL)
+        {
+            for(i = 0; i < hTable->size; i++)
+            {
+                FileRead(&pointer, sizeof(int), 1, hTable->hashPointers, int res);
+                sprintf(buff, "%i", pointer);
+                printf("%i\n", pointer);
+                //printf("Index: [%i] | Pointer: %s\n", i, pointer == -1?"NULL": buff);
+            }
+        }
+        else
+        {
+            throw(__NullPointerException__);
+        }
+        
+    }
+    catch(NullPointerException)
+    {
+        PrintExceptionStdOut(NullPointerException);
+    }
+}
+
+void InsertHashTable(Object hash, Object data, Object key)
+{
+    HashTable hTable = NULL;
+    unsigned index;
+
+    try
+    {
+        CHash(hash, hTable);
+        //ReWind(hTable->hashPointers);
+        index = hTable->HashFunction(key);
+        printf("index: %i\n", index);
+      //  FileSeek(hTable->hashPointers, index * sizeof(int), SEEK_SET);
+        //FileWrite(&index, sizeof(unsigned int), 1, hTable->hashPointers, int res);
+        fwrite(&index, sizeof(unsigned), 1, hTable->hashPointers);
+      //  printf("%i\n", res);
+    }
+    catch(NullPointerException)
+    {
+        PrintExceptionStdOut(NullPointerException);
+    }
 }
