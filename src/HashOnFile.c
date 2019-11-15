@@ -35,7 +35,7 @@ Object newHashTable(const char* tag, int size, int(*HashFunction)(Object))
 {
     HashTable hTable = NULL;
     unsigned i;
-    int temp = NULL_POINTER;
+    int temp = -1;
 
     try
     {
@@ -58,7 +58,7 @@ Object newHashTable(const char* tag, int size, int(*HashFunction)(Object))
                 throw(__MemoryAllocationException__);
             }
 
-            FileOpen(hTable->hashPointers,"hashTable.bin", "w+b");
+            FileOpen(hTable->hashPointers,"hashTable.bin", "wb+");
             FileOpen(hTable->data, strcat(hTable->tag, "_data.bin"), "wb+");
 
             for(i = 0; i < (hTable->size+1); i++)
@@ -118,13 +118,14 @@ void PrintHashTable(Object hash)
         hTable = (HashTable)hash;
 
         if(hTable != NULL)
-        {
+        {	
+        	ReWind(hTable->hashPointers);
             for(i = 0; i < hTable->size; i++)
             {
                 FileRead(&pointer, sizeof(int), 1, hTable->hashPointers, int res);
                 sprintf(buff, "%i", pointer);
                 printf("%i\n", pointer);
-                //printf("Index: [%i] | Pointer: %s\n", i, pointer == -1?"NULL": buff);
+                pointer = NULL_POINTER;
             }
         }
         else
@@ -147,13 +148,11 @@ void InsertHashTable(Object hash, Object data, Object key)
     try
     {
         CHash(hash, hTable);
-        //ReWind(hTable->hashPointers);
+        ReWind(hTable->hashPointers);
         index = hTable->HashFunction(key);
         printf("index: %i\n", index);
-      //  FileSeek(hTable->hashPointers, index * sizeof(int), SEEK_SET);
-        //FileWrite(&index, sizeof(unsigned int), 1, hTable->hashPointers, int res);
-        fwrite(&index, sizeof(unsigned), 1, hTable->hashPointers);
-      //  printf("%i\n", res);
+        FileSeek(hTable->hashPointers, index * sizeof(int), SEEK_SET);
+        FileWrite(&index, sizeof(unsigned int), 1, hTable->hashPointers, int res);
     }
     catch(NullPointerException)
     {
