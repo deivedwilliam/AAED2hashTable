@@ -36,6 +36,7 @@ Object newHashTable(const char* tag, int size, int(*HashFunction)(Object))
     HashTable hTable = NULL;
     unsigned i;
     int temp = -1;
+    char *txt_file[20];
 
     try
     {
@@ -58,8 +59,13 @@ Object newHashTable(const char* tag, int size, int(*HashFunction)(Object))
                 throw(__MemoryAllocationException__);
             }
 
-            FileOpen(hTable->hashPointers,"hashTable.bin", "wb+");
-            FileOpen(hTable->data, strcat(hTable->tag, "_data.bin"), "wb+");
+            strcat(txt_file, tag);
+            strcat(txt_file,"_HashTable.bin");
+            FileOpen(hTable->hashPointers, (const char*)txt_file, "wb+");
+            memset(txt_file, 0, sizeof(txt_file));
+            strcat(txt_file, tag);
+            strcat(txt_file,"_Data.bin");
+            FileOpen(hTable->data, (const char*)txt_file, "wb+");
 
             for(i = 0; i < (hTable->size+1); i++)
             {
