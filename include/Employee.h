@@ -16,5 +16,7 @@ void FreeEmployee(Object employee);
 int GetNextPointer(Object employee);
 int GetStatusFlag(Object employee);
 void FreeStatusFlag(Object employee);
+long int getRegisterSize(void);
+void PrintEmployee(Object reg);
 
 #endif

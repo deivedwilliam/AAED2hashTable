@@ -130,7 +130,7 @@ void PrintHashTable(Object hash)
             {
                 FileRead(&pointer, sizeof(int), 1, hTable->hashPointers, int res);
                 sprintf(buff, "%i", pointer);
-                printf("%i\n", pointer);
+                printf("Index[%i] = %s\n", i, pointer == NULL_POINTER?"NULL_POINTER":buff);
                 pointer = NULL_POINTER;
             }
         }
@@ -146,22 +146,52 @@ void PrintHashTable(Object hash)
     }
 }
 
-void InsertHashTable(Object hash, Object data, Object key)
+void PrintRegisterFile(Object hash, void(*ReadRegisterFile)(Object file))
 {
     HashTable hTable = NULL;
-    unsigned index;
+    unsigned i;
+    int res;
 
     try
     {
-        CHash(hash, hTable);
-        ReWind(hTable->hashPointers);
-        index = hTable->HashFunction(key);
-        printf("index: %i\n", index);
-        FileSeek(hTable->hashPointers, index * sizeof(int), SEEK_SET);
-        FileWrite(&index, sizeof(unsigned int), 1, hTable->hashPointers, int res);
+        hTable = (HashTable)hash;
+
+        if(hTable != NULL)
+        {   
+            ReWind(hTable->data);
+            ReadRegisterFile((Object)hTable->data);
+        }
+        else
+        {
+            throw(__NullPointerException__);
+        }
+        
     }
     catch(NullPointerException)
     {
         PrintExceptionStdOut(NullPointerException);
     }
 }
+
+void InsertHashTable(Object hash, Object data, Object key, long int size)
+{
+    HashTable hTable = NULL;
+    unsigned index;
+    long int offsetFile = 0;
+
+    try
+    {
+        CHash(hash, hTable);
+        ReWind(hTable->hashPointers);
+        index = hTable->HashFunction(key);
+        offsetFile = ftell(hTable->data);
+        FileSeek(hTable->hashPointers, index * sizeof(int), SEEK_SET);
+        FileWrite(&offsetFile, sizeof(unsigned int), 1, hTable->hashPointers, int res);
+        FileWrite(data, size, 1, hTable->data, int res);
+    }
+    catch(NullPointerException)
+    {
+        PrintExceptionStdOut(NullPointerException);
+    }
+}
+

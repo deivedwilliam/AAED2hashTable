@@ -34,7 +34,33 @@ typedef struct Employee
 	};
 }*Employee;
 
+long int getRegisterSize(void)
+{
+    return sizeof(struct Employee);
+}
 
+void PrintEmployee(Object reg)
+{
+    Employee employee = NULL;
+    char buff[20];
+
+    try
+    {
+        CEmployee(reg, employee);
+        printf("nome: %s\n", employee->name);
+        printf("age: %i\n", employee->age);
+        printf("code: %i\n", employee->code);
+        printf("salary: %.2f\n", employee->salary);
+        sprintf(buff, "%i", (short)employee->next);
+        printf("next: %s\n",(short)employee->next == NULL_POINTER?"NULL_POINTER":buff);
+        printf("status flag: %i\n", employee->status);
+    }
+    catch(NullPointerException)
+    {
+        PrintExceptionStdOut(NullPointerException);
+    }
+    
+}
 
 
 Object newEmployee(unsigned code, const char* name, short age, float salary)

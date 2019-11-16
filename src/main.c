@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 #include "../include/HashOnFile.h"
+#include "../include/Exception.h"
 #include "../include/Employee.h"
 
 
@@ -15,6 +16,25 @@ int HashFunction(Object key)
     return index;
 }
 
+void ReadRegisterFile(Object file)
+{
+    FILE* f = file;
+    int res;
+    Object obj;
+
+    obj = (Object)malloc(getRegisterSize());
+
+    while(1)
+    {
+        puts("*************************************************");
+        FileRead(obj, getRegisterSize(), 1, f, res);
+        PrintEmployee(obj);
+        puts("*************************************************");
+        if(!feof(f))
+            break;
+    }
+}
+
 int main(int argc, char const *argv[])
 {
     Object empl = NULL;
@@ -25,9 +45,11 @@ int main(int argc, char const *argv[])
 
     code = GetCodeEmployee(empl);
 
-    InsertHashTable(myHashTable, empl, &code);
+    InsertHashTable(myHashTable, empl, &code, getRegisterSize());
 
     PrintHashTable(myHashTable);
+
+    PrintRegisterFile(myHashTable, ReadRegisterFile);
 
     DestroyHashTable(myHashTable);
 
